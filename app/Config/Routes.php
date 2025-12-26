@@ -20,3 +20,13 @@ $routes->post('users/reset-password/(:num)', 'Users::resetPassword/$1');
 $routes->get('users/edit/(:num)', 'Users::edit/$1');
 $routes->post('users/update/(:num)', 'Users::update/$1');
 $routes->post('users/delete/(:num)', 'Users::delete/$1'); // Pakai POST agar aman
+
+// --- MANAJEMEN KELOMPOK ---
+$routes->get('kelompok', 'Kelompok::index');
+$routes->get('kelompok/create', 'Kelompok::create');
+$routes->post('kelompok/store', 'Kelompok::store');
+
+// ...
+$routes->get('kelompok/manage/(:num)', 'Kelompok::manage/$1'); // Halaman Manage
+$routes->post('kelompok/add-member', 'Kelompok::addMember');    // Proses Tambah
+$routes->get('kelompok/remove-member/(:num)', 'Kelompok::removeMember/$1'); // Hapus Member

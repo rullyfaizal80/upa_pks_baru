@@ -102,7 +102,11 @@
                 <a href="<?= base_url('users') ?>" class="<?= uri_string() == 'users' ? 'active' : '' ?>">
                     <i class="bi bi-people me-2"></i> Manajemen User
                 </a>
-                <a href="#"><i class="bi bi-gear me-2"></i> Pengaturan</a>
+                <a href="<?= base_url('kelompok') ?>" class="<?= uri_string() == 'kelompok' ? 'active' : '' ?>">
+                    <i class="bi bi-diagram-3 me-2"></i> Data Kelompok
+                </a>
+                
+                <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
             <?php endif; ?>
 
             <?php if (has_role('ketua', $my_roles) || has_role('pembina', $my_roles)) : ?>
