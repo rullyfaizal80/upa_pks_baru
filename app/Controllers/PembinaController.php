@@ -14,26 +14,29 @@ class PembinaController extends BaseController
     public function __construct()
     {
         $this->db = \Config\Database::connect();
-        // Menggunakan Model LaporanAmalanModel yang sudah Anda miliki
         $this->laporanModel = new LaporanAmalanModel(); 
     }
 
     // =================================================================
-    // 1. DASHBOARD PEMBINA (LIST KELOMPOK)
+    // 1. DASHBOARD (LIST KELOMPOK)
     // =================================================================
     public function index()
     {
         $userId = session()->get('id');
         
-        // 1. Ambil daftar kelompok dimana user ini adalah PEMBINA-nya
+        // 1. Ambil daftar kelompok
+        // Logic: Tampilkan jika user adalah PEMBINA -ATAU- SEKERTARIS dari kelompok tersebut
         $kelompokList = $this->db->table('kelompok')
-            ->where('pembina_id', $userId) 
+            ->groupStart() // Penting: Grouping query agar logika OR tidak bocor
+                ->where('pembina_id', $userId) 
+                ->orWhere('sekertaris_id', $userId)
+            ->groupEnd()
             ->get()->getResultArray();
 
-        // 2. Loop setiap kelompok untuk melengkapi data (Nama Pembina, Sekertaris, & Anggota)
+        // 2. Loop setiap kelompok untuk melengkapi data
         foreach ($kelompokList as &$k) {
             
-            // A. Cari Nama Pembina (dari kolom pembina_id)
+            // A. Cari Nama Pembina
             $pembina = $this->db->table('users')
                 ->select('nama')
                 ->where('id', $k['pembina_id'])
@@ -41,7 +44,6 @@ class PembinaController extends BaseController
             $k['nama_pembina'] = $pembina ? $pembina['nama'] : '-';
 
             // B. Cari Nama Sekertaris
-            // Menggunakan '?? 0' untuk mencegah error jika kolom sekertaris_id null/kosong
             $sekertaris = $this->db->table('users')
                 ->select('nama')
                 ->where('id', $k['sekertaris_id'] ?? 0) 
@@ -49,7 +51,6 @@ class PembinaController extends BaseController
             $k['nama_sekertaris'] = $sekertaris ? $sekertaris['nama'] : '- Belum ditentukan -';
 
             // C. Cari Daftar Anggota
-            // PERBAIKAN: Menggunakan tabel 'anggota_kelompok'
             $anggota = $this->db->table('anggota_kelompok')
                 ->select('users.nama, users.jenjang')
                 ->join('users', 'users.id = anggota_kelompok.user_id')
@@ -69,29 +70,35 @@ class PembinaController extends BaseController
     }
 
     // =================================================================
-    // 2. DETAIL MONITORING (Mingguan & Bulanan)
+    // 2. DETAIL MONITORING (MINGGUAN & BULANAN)
     // =================================================================
     public function monitoring($kelompokId)
     {
-        // -----------------------------------------------------------
-        // A. VALIDASI KELOMPOK
-        // -----------------------------------------------------------
+        // A. Ambil Data Kelompok
         $kelompok = $this->db->table('kelompok')->where('id', $kelompokId)->get()->getRowArray();
         
         if (!$kelompok) {
             return redirect()->to('/pembina')->with('error', 'Kelompok tidak ditemukan');
         }
 
+        // [KEAMANAN] Cek Hak Akses
+        // User harus Pembina ATAU Sekertaris dari kelompok ini
+        $userId = session()->get('id');
+        if ($kelompok['pembina_id'] != $userId && $kelompok['sekertaris_id'] != $userId) {
+            return redirect()->to('/pembina')->with('error', 'Akses Ditolak. Anda bukan pengurus kelompok ini.');
+        }
+
         // -----------------------------------------------------------
-        // B. DATA MINGGUAN (STATUS LAPORAN)
+        // BAGIAN 1: DATA MINGGUAN (STATUS LAPORAN)
         // -----------------------------------------------------------
         
-        // 1. Ambil filter tanggal (default hari ini) & Hitung Periode
+        // Ambil filter tanggal dari input URL, default hari ini
         $filterTanggal = $this->request->getGet('tanggal') ?? date('Y-m-d');
-        helper('laporan'); // Pastikan helper sudah dibuat
+        
+        helper('laporan'); // Load helper
         $periode = hitungPeriodeMingguan($filterTanggal);
 
-        // 2. Ambil Semua Anggota Kelompok
+        // Ambil Semua Anggota di Kelompok ini
         $anggotaList = $this->db->table('anggota_kelompok')
             ->select('users.id, users.nama, users.jenjang')
             ->join('users', 'users.id = anggota_kelompok.user_id')
@@ -99,13 +106,13 @@ class PembinaController extends BaseController
             ->orderBy('users.nama', 'ASC')
             ->get()->getResultArray();
 
-        // 3. Ambil Laporan yang masuk pada pekan tersebut
+        // Ambil Laporan yang SUDAH MASUK di periode ini
         $laporanMingguan = $this->laporanModel
             ->where('kelompok_id', $kelompokId)
             ->where('periode_mulai', $periode['mulai'])
             ->findAll();
 
-        // 4. Mapping Status (Siapa yang sudah, siapa yang belum)
+        // Mapping Status (Gabungkan Anggota & Laporan)
         $rekapMingguan = [];
         foreach ($anggotaList as $anggota) {
             $status = 'Belum Lapor';
@@ -127,19 +134,19 @@ class PembinaController extends BaseController
         }
 
         // -----------------------------------------------------------
-        // C. DATA BULANAN (RATA-RATA AMALAN)
+        // BAGIAN 2: DATA BULANAN (RATA-RATA AMALAN)
         // -----------------------------------------------------------
 
-        // 1. Ambil filter bulan & tahun (default saat ini)
+        // Ambil filter bulan/tahun, default sekarang
         $filterBulan = $this->request->getGet('bulan') ?? date('m');
         $filterTahun = $this->request->getGet('tahun') ?? date('Y');
 
-        // 2. Query Rata-rata per User (Termasuk Tilawah / Amalan 3)
+        // Query Rata-rata per User di Bulan tersebut
         $statsBulanan = $this->laporanModel
             ->select('user_id')
             ->selectAvg('amalan_1', 'avg1') // Jamaah
             ->selectAvg('amalan_2', 'avg2') // Qiyamul Lail
-            ->selectAvg('amalan_3', 'avg3') // Tilawah (SUDAH DIMASUKKAN KEMBALI)
+            ->selectAvg('amalan_3', 'avg3') // Tilawah
             ->selectAvg('amalan_4', 'avg4') // Shaum
             ->selectAvg('amalan_5', 'avg5') // Matsurat
             ->selectAvg('amalan_6', 'avg6') // Dhuha
@@ -152,12 +159,12 @@ class PembinaController extends BaseController
             ->groupBy('user_id')
             ->findAll();
 
-        // 3. Mapping Data Rata-rata ke Anggota
+        // Gabungkan Data Rata-rata ke list Anggota
         $rekapBulanan = [];
         foreach ($anggotaList as $anggota) {
             $stats = null;
             
-            // Cari data statistik milik user ini
+            // Cari data statistik user ini
             foreach ($statsBulanan as $s) {
                 if ($s['user_id'] == $anggota['id']) {
                     $stats = $s;
@@ -167,12 +174,12 @@ class PembinaController extends BaseController
 
             $rekapBulanan[] = [
                 'anggota' => $anggota,
-                'stats'   => $stats // Berisi avg1, avg2, dst.. atau null
+                'stats'   => $stats 
             ];
         }
 
         // -----------------------------------------------------------
-        // D. RETURN DATA KE VIEW
+        // RETURN VIEW
         // -----------------------------------------------------------
         $data = [
             'title'          => 'Monitoring Anggota',

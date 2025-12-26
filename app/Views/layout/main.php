@@ -146,7 +146,7 @@
         <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
     <?php endif; ?>
 
-    <?php if (has_role('ketua', $my_roles) || has_role('pembina', $my_roles)) : ?>
+    <?php if (has_role('ketua', $my_roles) || has_role('pembina', $my_roles) || has_role('sekertaris', $my_roles)) : ?>
         <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Pembinaan</div>
         <a href="<?= base_url('pembina') ?>" class="<?= uri_string() == 'pembina' ? 'active' : '' ?>">
             <i class="bi bi-eye me-2"></i> Monitoring Anggota

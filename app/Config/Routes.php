@@ -48,7 +48,7 @@ $routes->get('ganti-password', 'Auth::gantiPassword');
 $routes->post('ganti-password/update', 'Auth::updatePassword');
 
 // Route untuk Pembina/Sekertaris
-$routes->group('pembina', ['filter' => 'role:pembina,admin,ketua'], function($routes) {
-    $routes->get('/', 'PembinaController::index');                 // Dashboard Pembina
-    $routes->get('monitoring/(:num)', 'PembinaController::monitoring/$1'); // Detail Kelompok
+$routes->group('pembina', ['filter' => 'role:pembina,admin,ketua,sekertaris'], function($routes) {
+    $routes->get('/', 'PembinaController::index');
+    $routes->get('monitoring/(:num)', 'PembinaController::monitoring/$1');
 });
