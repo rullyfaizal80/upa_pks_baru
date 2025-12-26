@@ -46,3 +46,9 @@ $routes->group('laporan', ['filter' => 'auth'], function($routes) {
 // Routes Ganti Password (Universal untuk semua role)
 $routes->get('ganti-password', 'Auth::gantiPassword');
 $routes->post('ganti-password/update', 'Auth::updatePassword');
+
+// Route untuk Pembina/Sekertaris
+$routes->group('pembina', ['filter' => 'role:pembina,admin,ketua'], function($routes) {
+    $routes->get('/', 'PembinaController::index');                 // Dashboard Pembina
+    $routes->get('monitoring/(:num)', 'PembinaController::monitoring/$1'); // Detail Kelompok
+});
