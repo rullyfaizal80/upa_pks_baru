@@ -40,4 +40,5 @@ $routes->group('laporan', ['filter' => 'auth'], function($routes) {
     $routes->post('store', 'LaporanAmalanController::store');        // Proses Simpan
     $routes->get('edit/(:num)', 'LaporanAmalanController::edit/$1'); // Form Edit
     $routes->post('update/(:num)', 'LaporanAmalanController::update/$1'); // Proses Update
+    $routes->post('delete/(:num)', 'LaporanAmalanController::delete/$1');
 });

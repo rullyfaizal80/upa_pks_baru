@@ -317,4 +317,33 @@ class LaporanAmalanController extends BaseController
 
         return redirect()->to('/laporan/dashboard')->with('success', 'Perubahan berhasil disimpan!');
     }
+
+    // ==========================================================
+    // DELETE METHOD (Dengan Validasi Bulan Berjalan)
+    // ==========================================================
+    public function delete($id)
+    {
+        $userId = session()->get('id');
+        $laporan = $this->laporanModel->find($id);
+
+        // 1. Validasi Kepemilikan
+        if (!$laporan || $laporan['user_id'] != $userId) {
+            return redirect()->to('/laporan/dashboard')->with('error', 'Laporan tidak ditemukan.');
+        }
+
+        // 2. Validasi Bulan Berjalan
+        // Ambil bulan dari periode laporan (format YYYY-MM)
+        $bulanLaporan = date('Y-m', strtotime($laporan['periode_mulai']));
+        $bulanIni     = date('Y-m');
+
+        // Jika bulan laporan KURANG DARI bulan ini (Masa lalu), tolak.
+        if ($bulanLaporan < $bulanIni) {
+            return redirect()->to('/laporan/dashboard')->with('error', 'Gagal menghapus. Laporan bulan lalu sudah dikunci.');
+        }
+
+        // 3. Proses Hapus
+        $this->laporanModel->delete($id);
+
+        return redirect()->to('/laporan/dashboard')->with('success', 'Laporan berhasil dihapus.');
+    }
 }

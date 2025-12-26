@@ -76,11 +76,39 @@
                                 <td class="text-center">
                                     <span class="badge bg-success rounded-pill">Selesai</span>
                                 </td>
-                                <td class="text-center">
-                                    <a href="<?= base_url('laporan/edit/' . $row['id']) ?>" class="btn btn-sm btn-warning text-dark" title="Edit Laporan">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </a>
-                                </td>
+                                <td>
+            <div class="d-flex gap-2 justify-content-center">
+                
+                <?php 
+                            // Ambil Bulan Laporan & Bulan Sekarang
+                            $bulanLaporan = date('Y-m', strtotime($row['periode_mulai']));
+                            $bulanIni     = date('Y-m');
+                        ?>
+
+                        <?php if ($bulanLaporan == $bulanIni): ?>
+                            
+                            <a href="/laporan/edit/<?= $row['id'] ?>" class="btn btn-warning btn-sm fw-bold text-white" title="Edit Laporan">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <button type="button" class="btn btn-danger btn-sm fw-bold" onclick="konfirmasiHapus(<?= $row['id'] ?>)" title="Hapus Laporan">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                        <?php else: ?>
+                            
+                            <button class="btn btn-secondary btn-sm" disabled title="Edit Terkunci (Laporan Arsip)">
+                                <i class="bi bi-lock-fill"></i>
+                            </button>
+
+                            <button class="btn btn-secondary btn-sm" disabled title="Hapus Terkunci (Laporan Arsip)">
+                                <i class="bi bi-lock-fill"></i>
+                            </button>
+
+                        <?php endif; ?>
+                
+            </div>
+        </td>
                             </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -90,5 +118,39 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Hapus Laporan?</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus laporan ini? 
+                <br><small class="text-danger">Data yang dihapus tidak bisa dikembalikan.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="formHapusLaporan" action="" method="post">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function konfirmasiHapus(id) {
+    // Set action form dinamis berdasarkan ID
+    const form = document.getElementById('formHapusLaporan');
+    form.action = '/laporan/delete/' + id;
+    
+    // Tampilkan Modal
+    const myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    myModal.show();
+}
+</script>
 
 <?= $this->endSection() ?>
