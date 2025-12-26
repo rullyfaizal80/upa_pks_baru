@@ -42,3 +42,7 @@ $routes->group('laporan', ['filter' => 'auth'], function($routes) {
     $routes->post('update/(:num)', 'LaporanAmalanController::update/$1'); // Proses Update
     $routes->post('delete/(:num)', 'LaporanAmalanController::delete/$1');
 });
+
+// Routes Ganti Password (Universal untuk semua role)
+$routes->get('ganti-password', 'Auth::gantiPassword');
+$routes->post('ganti-password/update', 'Auth::updatePassword');

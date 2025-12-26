@@ -131,43 +131,47 @@
         ?>
 
         <nav class="mt-2">
-            <a href="<?= base_url('dashboard') ?>" class="<?= uri_string() == 'dashboard' ? 'active' : '' ?>">
-                <i class="bi bi-speedometer2 me-2"></i> Dashboard
-            </a>
+    <a href="<?= base_url('dashboard') ?>" class="<?= uri_string() == 'dashboard' ? 'active' : '' ?>">
+        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+    </a>
 
-            <?php if (has_role('admin', $my_roles)) : ?>
-                <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Administrator</div>
-                <a href="<?= base_url('users') ?>" class="<?= uri_string() == 'users' ? 'active' : '' ?>">
-                    <i class="bi bi-people me-2"></i> Manajemen User
-                </a>
-                <a href="<?= base_url('kelompok') ?>" class="<?= uri_string() == 'kelompok' ? 'active' : '' ?>">
-                    <i class="bi bi-diagram-3 me-2"></i> Data Kelompok
-                </a>
-                
-                <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
-            <?php endif; ?>
+    <?php if (has_role('admin', $my_roles)) : ?>
+        <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Administrator</div>
+        <a href="<?= base_url('users') ?>" class="<?= uri_string() == 'users' ? 'active' : '' ?>">
+            <i class="bi bi-people me-2"></i> Manajemen User
+        </a>
+        <a href="<?= base_url('kelompok') ?>" class="<?= uri_string() == 'kelompok' ? 'active' : '' ?>">
+            <i class="bi bi-diagram-3 me-2"></i> Data Kelompok
+        </a>
+        <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
+    <?php endif; ?>
 
-            <?php if (has_role('ketua', $my_roles) || has_role('pembina', $my_roles)) : ?>
-                <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Pembinaan</div>
-                <a href="#"><i class="bi bi-diagram-3 me-2"></i> Data Kelompok</a>
-                <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
-            <?php endif; ?>
+    <?php if (has_role('ketua', $my_roles) || has_role('pembina', $my_roles)) : ?>
+        <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Pembinaan</div>
+        <a href="#"><i class="bi bi-diagram-3 me-2"></i> Data Kelompok</a>
+        <a href="#"><i class="bi bi-journal-richtext me-2"></i> Laporan UPA</a>
+    <?php endif; ?>
 
-            <?php if (has_role('anggota', $my_roles)) : ?>
-                <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Aktivitas</div>
-                <a href="<?= base_url('laporan/dashboard') ?>" class="<?= uri_string() == 'laporan/dashboard' ? 'active' : '' ?>">
-                    <i class="bi bi-calendar-check me-2"></i> Laporan Yaumiyah
-                </a>
-            <?php endif; ?>
-        </nav>
+    <?php if (has_role('anggota', $my_roles)) : ?>
+        <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Aktivitas</div>
+        <a href="<?= base_url('laporan/dashboard') ?>" class="<?= uri_string() == 'laporan/dashboard' ? 'active' : '' ?>">
+            <i class="bi bi-calendar-check me-2"></i> Laporan Yaumiyah
+        </a>
+    <?php endif; ?>
 
-        <div class="px-3 pt-3 pb-5"> <div class="border-top border-secondary pt-3">
-                <a href="<?= base_url('logout') ?>" class="text-danger bg-transparent p-0 text-decoration-none fw-bold" style="display: block;">
-                    <i class="bi bi-box-arrow-left me-2"></i> Keluar / Logout
-                </a>
-            </div>
-        </div>
-        
+    <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Akun</div>
+    
+    <a href="<?= base_url('ganti-password') ?>" class="<?= uri_string() == 'ganti-password' ? 'active' : '' ?>">
+        <i class="bi bi-shield-lock me-2"></i> Ganti Password
+    </a>
+
+    <a href="<?= base_url('logout') ?>" class="text-danger mt-1">
+        <i class="bi bi-box-arrow-left me-2"></i> Logout
+    </a>
+
+</nav>
+
+               
         <div class="flex-grow-1"></div>
     </div>
 

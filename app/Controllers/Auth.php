@@ -71,4 +71,81 @@ class Auth extends BaseController
         session()->destroy();
         return redirect()->to('/login');
     }
+
+    // ... method logout() yang sudah ada ...
+
+    // =================================================================
+    // 1. TAMPILKAN FORM GANTI PASSWORD
+    // =================================================================
+    public function gantiPassword()
+    {
+        // Pastikan user sudah login
+        if (!session()->get('is_logged_in')) {
+            return redirect()->to('/login');
+        }
+
+        $data = [
+            'title' => 'Ganti Password',
+            'validation' => \Config\Services::validation()
+        ];
+        // Pastikan Anda sudah membuat view: app/Views/auth/ganti_password.php
+        return view('auth/ganti_password', $data);
+    }
+
+    // =================================================================
+    // 2. PROSES UPDATE PASSWORD
+    // =================================================================
+    public function updatePassword()
+    {
+        if (!session()->get('is_logged_in')) {
+            return redirect()->to('/login');
+        }
+
+        $userId = session()->get('id');
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->find($userId);
+
+        // A. Validasi Input
+        // Simpan rules dalam variabel agar rapi
+        $rules = [
+            'password_lama' => [
+                'rules'  => 'required',
+                'errors' => ['required' => 'Password lama wajib diisi.']
+            ],
+            'password_baru' => [
+                'rules'  => 'required', 
+                'errors' => ['required' => 'Password baru wajib diisi.']
+            ],
+            'konfirmasi_password' => [
+                'rules'  => 'required|matches[password_baru]', // INI KUNCI VALIDASI MATCHING
+                'errors' => [
+                    'required' => 'Konfirmasi password wajib diisi.',
+                    'matches'  => 'Password baru dan konfirmasi tidak sama.' // Pesan Error
+                ]
+            ],
+        ];
+
+        if (!$this->validate($rules)) {
+            // PENTING: withInput() mengembalikan apa yang diketik
+            // with('errors') mengembalikan pesan error spesifik
+            return redirect()->to('/ganti-password')->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // B. Cek Password Lama vs Database
+        $passwordLamaInput = $this->request->getPost('password_lama');
+        
+        if (!password_verify($passwordLamaInput, $user['password'])) {
+            // PENTING: Kirim error manual array agar bisa dibaca View sama seperti error validasi
+            return redirect()->to('/ganti-password')->withInput()->with('errors', ['password_lama' => 'Password lama salah!']);
+        }
+
+        // C. Update Password Baru
+        $passwordBaru = $this->request->getPost('password_baru');
+        
+        $userModel->update($userId, [
+            'password' => password_hash($passwordBaru, PASSWORD_DEFAULT)
+        ]);
+
+        return redirect()->to('/dashboard')->with('success', 'Password berhasil diubah.');
+    }
 }
