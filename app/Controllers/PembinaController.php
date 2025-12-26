@@ -69,70 +69,124 @@ class PembinaController extends BaseController
     }
 
     // =================================================================
-    // 2. DETAIL MONITORING PER KELOMPOK
+    // 2. DETAIL MONITORING (Mingguan & Bulanan)
     // =================================================================
     public function monitoring($kelompokId)
     {
-        // A. Ambil Data Kelompok
+        // -----------------------------------------------------------
+        // A. VALIDASI KELOMPOK
+        // -----------------------------------------------------------
         $kelompok = $this->db->table('kelompok')->where('id', $kelompokId)->get()->getRowArray();
         
         if (!$kelompok) {
             return redirect()->to('/pembina')->with('error', 'Kelompok tidak ditemukan');
         }
 
-        // B. Tentukan Periode (Default: Minggu ini)
-        // Ambil filter tanggal dari input URL, jika tidak ada pakai hari ini
-        $filterTanggal = $this->request->getGet('tanggal') ?? date('Y-m-d');
+        // -----------------------------------------------------------
+        // B. DATA MINGGUAN (STATUS LAPORAN)
+        // -----------------------------------------------------------
         
-        // Helper hitungPeriodeMingguan (Pastikan helper 'laporan' sudah diload di BaseController)
-        helper('laporan'); 
+        // 1. Ambil filter tanggal (default hari ini) & Hitung Periode
+        $filterTanggal = $this->request->getGet('tanggal') ?? date('Y-m-d');
+        helper('laporan'); // Pastikan helper sudah dibuat
         $periode = hitungPeriodeMingguan($filterTanggal);
 
-        // C. Ambil Semua Anggota di Kelompok ini
-        // PERBAIKAN: Menggunakan tabel 'anggota_kelompok'
+        // 2. Ambil Semua Anggota Kelompok
         $anggotaList = $this->db->table('anggota_kelompok')
-            ->select('users.id, users.nama, users.username, users.jenjang')
+            ->select('users.id, users.nama, users.jenjang')
             ->join('users', 'users.id = anggota_kelompok.user_id')
             ->where('anggota_kelompok.kelompok_id', $kelompokId)
             ->orderBy('users.nama', 'ASC')
             ->get()->getResultArray();
 
-        // D. Ambil Laporan yang SUDAH MASUK di periode ini (dari tabel laporan_amalan)
-        $laporanMasuk = $this->laporanModel
+        // 3. Ambil Laporan yang masuk pada pekan tersebut
+        $laporanMingguan = $this->laporanModel
             ->where('kelompok_id', $kelompokId)
             ->where('periode_mulai', $periode['mulai'])
             ->findAll();
 
-        // E. LOGIKA GABUNGAN (Mapping Status)
-        // Kita loop daftar anggota, cek apakah ID mereka ada di daftar laporan masuk
-        $rekapData = [];
-        
+        // 4. Mapping Status (Siapa yang sudah, siapa yang belum)
+        $rekapMingguan = [];
         foreach ($anggotaList as $anggota) {
             $status = 'Belum Lapor';
-            $detailLaporan = null;
+            $detail = null;
 
-            // Cek satu per satu di array laporan
-            foreach ($laporanMasuk as $lap) {
+            foreach ($laporanMingguan as $lap) {
                 if ($lap['user_id'] == $anggota['id']) {
                     $status = 'Sudah Lapor';
-                    $detailLaporan = $lap;
-                    break; // Stop loop jika sudah ketemu
+                    $detail = $lap;
+                    break;
                 }
             }
-
-            $rekapData[] = [
+            
+            $rekapMingguan[] = [
                 'anggota' => $anggota,
                 'status'  => $status,
-                'laporan' => $detailLaporan
+                'laporan' => $detail
             ];
         }
 
+        // -----------------------------------------------------------
+        // C. DATA BULANAN (RATA-RATA AMALAN)
+        // -----------------------------------------------------------
+
+        // 1. Ambil filter bulan & tahun (default saat ini)
+        $filterBulan = $this->request->getGet('bulan') ?? date('m');
+        $filterTahun = $this->request->getGet('tahun') ?? date('Y');
+
+        // 2. Query Rata-rata per User (Termasuk Tilawah / Amalan 3)
+        $statsBulanan = $this->laporanModel
+            ->select('user_id')
+            ->selectAvg('amalan_1', 'avg1') // Jamaah
+            ->selectAvg('amalan_2', 'avg2') // Qiyamul Lail
+            ->selectAvg('amalan_3', 'avg3') // Tilawah (SUDAH DIMASUKKAN KEMBALI)
+            ->selectAvg('amalan_4', 'avg4') // Shaum
+            ->selectAvg('amalan_5', 'avg5') // Matsurat
+            ->selectAvg('amalan_6', 'avg6') // Dhuha
+            ->selectAvg('amalan_7', 'avg7') // Olahraga
+            ->selectAvg('amalan_8', 'avg8') // Istighfar
+            ->selectAvg('amalan_9', 'avg9') // Shalawat
+            ->where('kelompok_id', $kelompokId)
+            ->where('MONTH(periode_mulai)', $filterBulan)
+            ->where('YEAR(periode_mulai)', $filterTahun)
+            ->groupBy('user_id')
+            ->findAll();
+
+        // 3. Mapping Data Rata-rata ke Anggota
+        $rekapBulanan = [];
+        foreach ($anggotaList as $anggota) {
+            $stats = null;
+            
+            // Cari data statistik milik user ini
+            foreach ($statsBulanan as $s) {
+                if ($s['user_id'] == $anggota['id']) {
+                    $stats = $s;
+                    break;
+                }
+            }
+
+            $rekapBulanan[] = [
+                'anggota' => $anggota,
+                'stats'   => $stats // Berisi avg1, avg2, dst.. atau null
+            ];
+        }
+
+        // -----------------------------------------------------------
+        // D. RETURN DATA KE VIEW
+        // -----------------------------------------------------------
         $data = [
-            'title'         => 'Monitoring Anggota',
-            'kelompok'      => $kelompok,
-            'periode'       => $periode,
-            'filter_tanggal'=> $filterTanggal,
-            'rekap_data'    => $rekapData
+            'title'          => 'Monitoring Anggota',
+            'kelompok'       => $kelompok,
+            
+            // Data Mingguan
+            'periode'        => $periode,
+            'filter_tanggal' => $filterTanggal,
+            'rekap_mingguan' => $rekapMingguan,
+
+            // Data Bulanan
+            'filter_bulan'   => $filterBulan,
+            'filter_tahun'   => $filterTahun,
+            'rekap_bulanan'  => $rekapBulanan
         ];
 
         return view('pembina/monitoring', $data);
