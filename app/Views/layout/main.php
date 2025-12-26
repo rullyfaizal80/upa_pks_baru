@@ -49,15 +49,43 @@
             width: 100%;
         }
 
-        /* Responsive Mobile */
+        /* --- 2. CSS RESPONSIVE (TAMPILAN HP) --- */
         @media (max-width: 768px) {
-            .sidebar { 
-                margin-left: -250px; 
+            
+            /* A. LOGIKA SIDEBAR HP (Sembunyi by default) */
+            .sidebar {
+                margin-left: -250px;
                 position: fixed;
                 z-index: 999;
                 height: 100%;
             }
-            .sidebar.active { margin-left: 0; }
+            .sidebar.active {
+                margin-left: 0;
+            }
+
+            /* B. LOGIKA TABEL FREEZE (STICKY COLUMN) */
+            
+            /* Sembunyikan kolom "No" di HP agar hemat tempat */
+            .col-no {
+                display: none;
+            }
+
+            /* Bekukan (Freeze) kolom "Nama" agar menempel di kiri saat discroll */
+            .sticky-col {
+                position: sticky;
+                left: 0;
+                background-color: #fff !important; /* Wajib putih agar tidak transparan */
+                z-index: 10;
+                box-shadow: 2px 0 5px -2px rgba(0,0,0,0.2); /* Bayangan pemisah */
+                border-right: 1px solid #dee2e6;
+                
+                /* Opsional: Kecilkan font sedikit di HP agar muat */
+                font-size: 0.9rem;
+                max-width: 150px; /* Batasi lebar nama agar tidak terlalu lebar */
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
     </style>
 </head>

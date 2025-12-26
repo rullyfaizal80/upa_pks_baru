@@ -133,4 +133,48 @@ class Kelompok extends BaseController
             ->groupBy('users.id')
             ->get()->getResultArray();
     }
+
+    // --- FORM EDIT KELOMPOK ---
+    public function edit($id)
+    {
+        // 1. Ambil data kelompok berdasarkan ID
+        $kelompok = $this->kelompokModel->find($id);
+        if (!$kelompok) {
+            return redirect()->to('/kelompok')->with('errors', ['Kelompok tidak ditemukan']);
+        }
+
+        // 2. Ambil list Pembina & Sekertaris (untuk Dropdown)
+        $pembinas = $this->getUsersByRole('pembina');
+        $sekertaris = $this->getUsersByRole('sekertaris');
+
+        $data = [
+            'kelompok' => $kelompok,
+            'pembinas' => $pembinas,
+            'sekertaris' => $sekertaris
+        ];
+
+        return view('kelompok/edit', $data);
+    }
+
+    // --- PROSES UPDATE KELOMPOK ---
+    public function update($id)
+    {
+        // Validasi
+        if (!$this->validate([
+            'nama_kelompok' => 'required',
+            'pembina_id'    => 'required',
+            'sekertaris_id' => 'required'
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Simpan Perubahan
+        $this->kelompokModel->update($id, [
+            'nama_kelompok' => $this->request->getVar('nama_kelompok'),
+            'pembina_id'    => $this->request->getVar('pembina_id'),
+            'sekertaris_id' => $this->request->getVar('sekertaris_id')
+        ]);
+
+        return redirect()->to('/kelompok')->with('success', 'Data kelompok berhasil diperbarui.');
+    }
 }

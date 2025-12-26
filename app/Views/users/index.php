@@ -15,8 +15,10 @@
             <table class="table table-hover table-bordered align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th width="5%">No</th>
-                        <th>Nama</th>
+                        <th width="5%" class="col-no">No</th>
+                        
+                        <th class="sticky-col">Nama Lengkap</th>
+                        
                         <th>Username</th>
                         <th>Gender</th>
                         <th>Jenjang</th>
@@ -27,8 +29,12 @@
                 <tbody>
                     <?php foreach ($users as $index => $user) : ?>
                     <tr>
-                        <td><?= $index + 1 + (5 * ($pager->getCurrentPage('users') - 1)) ?></td>
-                        <td><?= esc($user['nama']) ?></td>
+                        <td class="col-no"><?= $index + 1 + (10 * ($pager->getCurrentPage('users') - 1)) ?></td>
+                        
+                        <td class="sticky-col">
+                            <div class="fw-bold"><?= esc($user['nama']) ?></div>
+                        </td>
+                        
                         <td><?= esc($user['username']) ?></td>
                         <td><?= esc($user['gender']) ?></td>
                         <td><?= esc($user['jenjang']) ?></td>

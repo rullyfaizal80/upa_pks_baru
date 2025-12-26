@@ -30,3 +30,6 @@ $routes->post('kelompok/store', 'Kelompok::store');
 $routes->get('kelompok/manage/(:num)', 'Kelompok::manage/$1'); // Halaman Manage
 $routes->post('kelompok/add-member', 'Kelompok::addMember');    // Proses Tambah
 $routes->get('kelompok/remove-member/(:num)', 'Kelompok::removeMember/$1'); // Hapus Member
+// ... Route kelompok sebelumnya ...
+$routes->get('kelompok/edit/(:num)', 'Kelompok::edit/$1');      // Form Edit
+$routes->post('kelompok/update/(:num)', 'Kelompok::update/$1'); // Proses Update
