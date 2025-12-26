@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Aplikasi UPA</title>
+    <title>Aplikasi UPA</title>   
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
@@ -96,7 +96,10 @@
 
 <nav class="navbar navbar-dark bg-dark d-md-none shadow-sm">
   <div class="container-fluid">
-    <span class="navbar-brand mb-0 h1">App UPA</span>
+    <span class="navbar-brand mb-0 h1">
+        <img src="<?= base_url('assets/img/pks.png') ?>" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-1">
+        App UPA
+    </span>
     <button class="btn btn-outline-light" type="button" id="sidebarToggle">
         <i class="bi bi-list"></i>
     </button>
@@ -105,25 +108,29 @@
 
 <div class="wrapper">
     <div class="sidebar d-flex flex-column" id="sidebar">
-        <div class="sidebar-header">
-            <h5 class="mb-0 fw-bold">Sistem UPA</h5>
-            <small class="text-muted" style="font-size: 0.8rem;">
-                Halo, <?= session()->get('nama') ?? 'User' ?>
-            </small>
+        
+        <div class="sidebar-header d-flex align-items-center p-3">
+            <div class="me-3">
+                <img src="<?= base_url('assets/img/pks.png') ?>" alt="Logo UPA" style="width: 45px; height: auto;">
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold">Aplikasi UPA</h5>
+                <small class="text-white-50" style="font-size: 0.8rem;">
+                    Halo, <?= session()->get('nama') ?? 'User' ?>
+                </small>
+            </div>
         </div>
         
+        <hr class="text-secondary mt-0 mb-2 mx-3">
+
         <?php 
-            // Ambil role dari session login
-            // Jika tidak ada session, anggap array kosong (tamu)
             $my_roles = session()->get('roles') ?? []; 
-            
-            // Fungsi helper sederhana untuk cek role (opsional, biar kodingan di bawah rapi)
             function has_role($role, $user_roles) {
                 return in_array($role, $user_roles);
             }
         ?>
 
-        <nav class="mt-2 flex-grow-1">
+        <nav class="mt-2">
             <a href="<?= base_url('dashboard') ?>" class="<?= uri_string() == 'dashboard' ? 'active' : '' ?>">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </a>
@@ -152,11 +159,14 @@
             <?php endif; ?>
         </nav>
 
-        <div class="p-3 border-top border-secondary">
-            <a href="<?= base_url('logout') ?>" class="text-danger bg-transparent p-0">
-                <i class="bi bi-box-arrow-left me-2"></i> Keluar / Logout
-            </a>
+        <div class="px-3 pt-3 pb-5"> <div class="border-top border-secondary pt-3">
+                <a href="<?= base_url('logout') ?>" class="text-danger bg-transparent p-0 text-decoration-none fw-bold" style="display: block;">
+                    <i class="bi bi-box-arrow-left me-2"></i> Keluar / Logout
+                </a>
+            </div>
         </div>
+        
+        <div class="flex-grow-1"></div>
     </div>
 
     <div class="content">
@@ -172,8 +182,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // Script sederhana untuk toggle sidebar di Mobile
     document.getElementById('sidebarToggle')?.addEventListener('click', function() {
         document.getElementById('sidebar').classList.toggle('active');
     });
