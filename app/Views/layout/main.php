@@ -87,6 +87,9 @@
                 white-space: nowrap;
             }
         }
+        .select2-container--bootstrap-5 .select2-selection {
+            border-color: #dee2e6; 
+        }
     </style>
 </head>
 <body>

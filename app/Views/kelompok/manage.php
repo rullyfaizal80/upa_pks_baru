@@ -1,4 +1,14 @@
 <?= $this->extend('layout/main') ?>
+<?= $this->section('css') ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<style>
+    /* Sedikit perbaikan agar Select2 pas dengan Bootstrap 5 */
+    .select2-container--bootstrap-5 .select2-selection {
+        border-color: #dee2e6; 
+    }
+</style>
+<?= $this->endSection() ?>
 <?= $this->section('content') ?>
 
 <div class="row">
@@ -39,15 +49,16 @@
                     <input type="hidden" name="kelompok_id" value="<?= $kelompok['id'] ?>">
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Pilih Anggota</label>
-                        <select name="user_id" class="form-select" required>
-                            <option value="">-- Pilih User --</option>
-                            <?php foreach($calonAnggota as $ca): ?>
-                                <option value="<?= $ca['id'] ?>"><?= $ca['nama'] ?> (<?= $ca['jenjang'] ?>)</option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="form-text small">Hanya user role <b>Anggota</b> yang muncul.</div>
-                    </div>
+    <label class="form-label small fw-bold">Pilih Anggota</label>
+    
+    <select name="user_id" id="pilihAnggota" class="form-select" required>
+        <option value="">-- Pilih Nama Anggota --</option>
+        <?php foreach($calonAnggota as $ca): ?>
+            <option value="<?= $ca['id'] ?>"><?= $ca['nama'] ?> (<?= $ca['jenjang'] ?>)</option>
+        <?php endforeach; ?>
+    </select>
+        
+</div>
 
                     <button type="submit" class="btn btn-success w-100">Tambahkan ke Kelompok</button>
                 </form>
@@ -98,4 +109,19 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#pilihAnggota').select2({
+            theme: 'bootstrap-5', // Agar gayanya menyatu dengan Bootstrap
+            placeholder: 'Atau ketik disini nama anggota',
+            allowClear: true,
+            width: '100%' // Penting agar tidak mengecil
+        });
+    });
+</script>
+
 <?= $this->endSection() ?>

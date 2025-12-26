@@ -72,17 +72,23 @@ class Kelompok extends BaseController
         $kelompok = $this->kelompokModel->getKelompokLengkap()->find($id);
         if (!$kelompok) return redirect()->to('/kelompok');
 
-        // Ambil Anggota yang sudah masuk
+        // 1. Ambil Anggota yang SUDAH masuk kelompok ini
         $members = $this->anggotaModel->getMembersByKelompok($id);
 
-        // Ambil calon Anggota (HANYA ROLE 'ANGGOTA')
-        // Logic: Role harus 'anggota', DAN belum punya kelompok
+        // 2. Ambil Calon Anggota (Logic BARU)
+        // Syarat: Role 'anggota' DAN ID-nya TIDAK ADA di tabel anggota_kelompok manapun
+        
         $calonAnggota = $this->db->table('users')
              ->select('users.id, users.nama, users.jenjang')
              ->join('user_roles', 'users.id = user_roles.user_id')
              ->join('roles', 'roles.id = user_roles.role_id')
-             ->where('roles.role_name', 'anggota') // Filter keras hanya role anggota
+             ->where('roles.role_name', 'anggota')
+             // Filter: Buang user yang sudah ada di tabel anggota_kelompok
+             ->whereNotIn('users.id', function($builder) {
+                 return $builder->select('user_id')->from('anggota_kelompok');
+             })
              ->groupBy('users.id')
+             ->orderBy('users.nama', 'ASC') // Urutkan nama abjad agar rapi
              ->get()->getResultArray();
 
         $data = [
