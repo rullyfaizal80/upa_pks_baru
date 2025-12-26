@@ -33,3 +33,11 @@ $routes->get('kelompok/remove-member/(:num)', 'Kelompok::removeMember/$1'); // H
 // ... Route kelompok sebelumnya ...
 $routes->get('kelompok/edit/(:num)', 'Kelompok::edit/$1');      // Form Edit
 $routes->post('kelompok/update/(:num)', 'Kelompok::update/$1'); // Proses Update
+
+$routes->group('laporan', ['filter' => 'auth'], function($routes) {
+    $routes->get('dashboard', 'LaporanAmalanController::dashboard'); // Halaman List Laporan
+    $routes->get('create', 'LaporanAmalanController::create');       // Form Isi Laporan
+    $routes->post('store', 'LaporanAmalanController::store');        // Proses Simpan
+    $routes->get('edit/(:num)', 'LaporanAmalanController::edit/$1'); // Form Edit
+    $routes->post('update/(:num)', 'LaporanAmalanController::update/$1'); // Proses Update
+});

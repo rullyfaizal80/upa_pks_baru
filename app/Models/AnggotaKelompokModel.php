@@ -24,4 +24,10 @@ class AnggotaKelompokModel extends Model
                     ->where('anggota_kelompok.kelompok_id', $kelompokId)
                     ->findAll();
     }
+
+    public function getKelompokByUser($userId)
+    {
+        // Ambil satu baris data anggota berdasarkan user_id
+        return $this->where('user_id', $userId)->first();
+    }
 }

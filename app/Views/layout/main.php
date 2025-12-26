@@ -155,7 +155,9 @@
 
             <?php if (has_role('anggota', $my_roles)) : ?>
                 <div class="text-uppercase small text-secondary px-3 mt-4 mb-1 fw-bold" style="font-size: 0.7rem;">Aktivitas</div>
-                <a href="#"><i class="bi bi-calendar-check me-2"></i> Laporan Yaumiyah</a>
+                <a href="<?= base_url('laporan/dashboard') ?>" class="<?= uri_string() == 'laporan/dashboard' ? 'active' : '' ?>">
+                    <i class="bi bi-calendar-check me-2"></i> Laporan Yaumiyah
+                </a>
             <?php endif; ?>
         </nav>
 
