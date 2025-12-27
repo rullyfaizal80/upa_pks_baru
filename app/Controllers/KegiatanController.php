@@ -25,15 +25,24 @@ class KegiatanController extends BaseController
             return redirect()->to('/dashboard')->with('error', 'Anda bukan pengurus kelompok manapun.');
         }
 
+        // 1. AMBIL FILTER (Default: Tahun & Bulan Ini)
+        $tahun = $this->request->getGet('tahun') ?? date('Y');
+        $bulan = $this->request->getGet('bulan') ?? date('m');
+
+        // 2. QUERY DATA
         $laporan = $this->laporanModel
             ->where('kelompok_id', $kelompok['id'])
+            ->where('YEAR(tanggal)', $tahun)
+            ->where('MONTH(tanggal)', $bulan)
             ->orderBy('tanggal', 'DESC')
             ->findAll();
 
         $data = [
-            'title' => 'Riwayat Laporan UPA',
+            'title'    => 'Laporan UPA',
             'kelompok' => $kelompok,
-            'laporan' => $laporan
+            'laporan'  => $laporan,
+            'tahun'    => $tahun, // Untuk selected di dropdown
+            'bulan'    => $bulan  // Untuk selected di dropdown
         ];
 
         return view('kegiatan/index', $data);
