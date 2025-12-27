@@ -51,4 +51,5 @@ $routes->post('ganti-password/update', 'Auth::updatePassword');
 $routes->group('pembina', ['filter' => 'role:pembina,admin,ketua,sekertaris'], function($routes) {
     $routes->get('/', 'PembinaController::index');
     $routes->get('monitoring/(:num)', 'PembinaController::monitoring/$1');
+    $routes->get('laporan-ketua', 'PembinaController::laporanKetua');
 });

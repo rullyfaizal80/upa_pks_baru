@@ -215,4 +215,142 @@ class PembinaController extends BaseController
 
         return view('pembina/monitoring', $data);
     }
+
+    // =================================================================
+    // 3. LAPORAN KESELURUHAN (KHUSUS KETUA)
+    // =================================================================
+    public function laporanKetua()
+    {
+        // 1. Cek Hak Akses (Hanya Ketua & Admin)
+        $userRoles = session()->get('roles') ?? [];
+        if (!in_array('ketua', $userRoles) && !in_array('admin', $userRoles)) {
+            return redirect()->to('/pembina')->with('error', 'Halaman ini khusus untuk Ketua.');
+        }
+
+        // 2. Ambil Filter Bulan & Tahun
+        $bulan = $this->request->getGet('bulan') ?? date('m');
+        $tahun = $this->request->getGet('tahun') ?? date('Y');
+
+        // -----------------------------------------------------------
+        // A. DATA DEMOGRAFI (JUMLAH-JUMLAHAN)
+        // -----------------------------------------------------------
+        
+        // 1. Total Kelompok
+        $totalKelompok = $this->db->table('kelompok')->countAllResults();
+
+        // 2. Total Pembina (Muda & Pratama)
+        // Kita hitung user yang sedang menjabat sebagai pembina di tabel kelompok (distinct)
+        $pembinaStats = $this->db->table('kelompok')
+            ->select('users.jenjang, COUNT(DISTINCT kelompok.pembina_id) as total')
+            ->join('users', 'users.id = kelompok.pembina_id')
+            ->groupBy('users.jenjang')
+            ->get()->getResultArray();
+        
+        // Parsing hasil query pembina
+        $pembinaMuda = 0; $pembinaPratama = 0;
+        foreach ($pembinaStats as $p) {
+            if ($p['jenjang'] == 'Muda') $pembinaMuda = $p['total'];
+            if ($p['jenjang'] == 'Pratama') $pembinaPratama = $p['total'];
+        }
+
+        // 3. Total Sekertaris (Muda & Pratama)
+        $sekertarisStats = $this->db->table('kelompok')
+            ->select('users.jenjang, COUNT(DISTINCT kelompok.sekertaris_id) as total')
+            ->join('users', 'users.id = kelompok.sekertaris_id')
+            ->where('kelompok.sekertaris_id !=', 0) // Pastikan ada sekertarisnya
+            ->groupBy('users.jenjang')
+            ->get()->getResultArray();
+
+        $sekertarisMuda = 0; $sekertarisPratama = 0;
+        foreach ($sekertarisStats as $s) {
+            if ($s['jenjang'] == 'Muda') $sekertarisMuda = $s['total'];
+            if ($s['jenjang'] == 'Pratama') $sekertarisPratama = $s['total'];
+        }
+
+        // 4. Total Anggota (Gender & Jenjang)
+        // Hitung anggota yang SUDAH masuk kelompok (ada di tabel anggota_kelompok)
+        $anggotaQuery = $this->db->table('anggota_kelompok')
+            ->join('users', 'users.id = anggota_kelompok.user_id')
+            ->select('users.jenjang, users.gender'); // Pastikan kolom gender ada di tabel users (L/P)
+        
+        $rawAnggota = $anggotaQuery->get()->getResultArray();
+
+        $totalAnggota = count($rawAnggota);
+        $anggotaL = 0; $anggotaP = 0;
+        $anggotaMuda = 0; $anggotaPratama = 0;
+
+        foreach ($rawAnggota as $a) {
+            // Hitung Gender
+            if ($a['gender'] == 'L') $anggotaL++;
+            else $anggotaP++; // Asumsi selain L adalah P
+
+            // Hitung Jenjang
+            if ($a['jenjang'] == 'Muda') $anggotaMuda++;
+            else $anggotaPratama++; // Asumsi Pratama (atau lainnya)
+        }
+
+        // -----------------------------------------------------------
+        // B. DATA STATISTIK AMALAN (RATA-RATA)
+        // -----------------------------------------------------------
+        
+        // 1. Statistik Keseluruhan
+        $statAll = $this->getStatistikAmalan($bulan, $tahun, null);
+
+        // 2. Statistik Muda
+        $statMuda = $this->getStatistikAmalan($bulan, $tahun, 'Muda');
+
+        // 3. Statistik Pratama
+        $statPratama = $this->getStatistikAmalan($bulan, $tahun, 'Pratama');
+
+        $data = [
+            'title' => 'Laporan Bulanan Ketua',
+            'filter_bulan' => $bulan,
+            'filter_tahun' => $tahun,
+            
+            // Demografi
+            'total_kelompok' => $totalKelompok,
+            'pembina_muda' => $pembinaMuda, 'pembina_pratama' => $pembinaPratama,
+            'sekertaris_muda' => $sekertarisMuda, 'sekertaris_pratama' => $sekertarisPratama,
+            'total_anggota' => $totalAnggota,
+            'anggota_l' => $anggotaL, 'anggota_p' => $anggotaP,
+            'anggota_muda' => $anggotaMuda, 'anggota_pratama' => $anggotaPratama,
+
+            // Statistik
+            'stat_all' => $statAll,
+            'stat_muda' => $statMuda,
+            'stat_pratama' => $statPratama
+        ];
+
+        return view('pembina/laporan_ketua', $data);
+    }
+
+    // --- PRIVATE HELPER: MENGHITUNG RATA-RATA ---
+    private function getStatistikAmalan($bulan, $tahun, $jenjang = null)
+    {
+        $builder = $this->laporanModel
+            ->join('users', 'users.id = laporan_amalan.user_id')
+            ->where('MONTH(periode_mulai)', $bulan)
+            ->where('YEAR(periode_mulai)', $tahun);
+
+        if ($jenjang) {
+            $builder->where('users.jenjang', $jenjang);
+        }
+
+        // LOGIKA KHUSUS AMALAN 1 (SHOLAT JAMAAH)
+        // Hanya hitung rata-rata jika gender = 'L'
+        // Kita pakai syntax SQL CASE WHEN didalam AVG
+        $builder->select('AVG(CASE WHEN users.gender = "L" THEN amalan_1 ELSE NULL END) as avg1');
+        
+        // Amalan 2-9 Normal (Semua Gender)
+        $builder->selectAvg('amalan_2', 'avg2');
+        $builder->selectAvg('amalan_3', 'avg3');
+        $builder->selectAvg('amalan_4', 'avg4');
+        $builder->selectAvg('amalan_5', 'avg5');
+        $builder->selectAvg('amalan_6', 'avg6');
+        $builder->selectAvg('amalan_7', 'avg7');
+        $builder->selectAvg('amalan_8', 'avg8');
+        $builder->selectAvg('amalan_9', 'avg9');
+
+        return $builder->get()->getRowArray();
+    }
 }
