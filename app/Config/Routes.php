@@ -58,4 +58,15 @@ $routes->group('kegiatan', ['filter' => 'role:pembina,sekertaris'], function($ro
     $routes->get('/', 'KegiatanController::index');       // Halaman List
     $routes->get('create', 'KegiatanController::create'); // Halaman Form
     $routes->post('store', 'KegiatanController::store');  // Proses Simpan
+
+    // --- Route Tambahan untuk Edit & Delete ---
+    $routes->get('edit/(:num)', 'KegiatanController::edit/$1');    // Halaman Edit
+    $routes->post('update/(:num)', 'KegiatanController::update/$1'); // Proses Update
+    $routes->post('delete/(:num)', 'KegiatanController::delete/$1');  // Proses Delete (GET)
+    // Atau jika pakai POST delete: $routes->post('delete/(:num)', ...);
+});
+
+$routes->group('statistik', ['filter' => 'role:admin,ketua'], function($routes) {
+    $routes->get('/', 'StatistikController::index');
+    $routes->get('detail/(:num)', 'StatistikController::getDetailJson/$1');
 });

@@ -159,6 +159,9 @@
             <a href="<?= base_url('pembina/laporan-ketua') ?>">
                 <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Bulanan
             </a>
+            <a href="<?= base_url('statistik') ?>" >            
+                <i class="bi bi-graph-up-arrow me-2"></i> Laporan Pelaksanaan
+            </a>
         <?php endif; ?>        
     <?php endif; ?>  
 
