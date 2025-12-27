@@ -53,3 +53,9 @@ $routes->group('pembina', ['filter' => 'role:pembina,admin,ketua,sekertaris'], f
     $routes->get('monitoring/(:num)', 'PembinaController::monitoring/$1');
     $routes->get('laporan-ketua', 'PembinaController::laporanKetua');
 });
+
+$routes->group('kegiatan', ['filter' => 'role:pembina,sekertaris'], function($routes) {
+    $routes->get('/', 'KegiatanController::index');       // Halaman List
+    $routes->get('create', 'KegiatanController::create'); // Halaman Form
+    $routes->post('store', 'KegiatanController::store');  // Proses Simpan
+});
