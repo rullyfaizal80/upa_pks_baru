@@ -10,6 +10,9 @@ $routes->get('/login', 'Auth::index');
 $routes->post('/auth/process', 'Auth::process');
 $routes->get('/logout', 'Auth::logout');
 $routes->get('/dashboard', 'Dashboard::index');
+$routes->post('dashboard/pengumuman/tambah', 'Dashboard::tambahPengumuman');
+$routes->post('dashboard/pengumuman/update', 'Dashboard::updatePengumuman'); // Route Baru
+$routes->get('dashboard/pengumuman/hapus/(:num)', 'Dashboard::hapusPengumuman/$1');
 
 // --- MANAJEMEN USERS ---
 $routes->get('users', 'Users::index');           // Menampilkan tabel user
