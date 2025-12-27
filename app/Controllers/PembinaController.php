@@ -23,15 +23,25 @@ class PembinaController extends BaseController
     public function index()
     {
         $userId = session()->get('id');
-        
-        // 1. Ambil daftar kelompok
-        // Logic: Tampilkan jika user adalah PEMBINA -ATAU- SEKERTARIS dari kelompok tersebut
-        $kelompokList = $this->db->table('kelompok')
-            ->groupStart() // Penting: Grouping query agar logika OR tidak bocor
-                ->where('pembina_id', $userId) 
+        $userRoles = session()->get('roles') ?? []; // Ambil role dari session
+
+        // Mulai Query Builder
+        $builder = $this->db->table('kelompok');
+
+        // LOGIKA BARU: 
+        // Jika User adalah 'ketua' atau 'admin', Tampilkan SEMUA kelompok.
+        // Jika BUKAN, maka filter berdasarkan pembina_id atau sekertaris_id.
+        $isKetua = in_array('ketua', $userRoles) || in_array('admin', $userRoles);
+
+        if (!$isKetua) {
+            $builder->groupStart()
+                ->where('pembina_id', $userId)
                 ->orWhere('sekertaris_id', $userId)
-            ->groupEnd()
-            ->get()->getResultArray();
+            ->groupEnd();
+        }
+
+        // Eksekusi Query
+        $kelompokList = $builder->orderBy('nama_kelompok', 'ASC')->get()->getResultArray();
 
         // 2. Loop setiap kelompok untuk melengkapi data
         foreach ($kelompokList as &$k) {
@@ -81,11 +91,18 @@ class PembinaController extends BaseController
             return redirect()->to('/pembina')->with('error', 'Kelompok tidak ditemukan');
         }
 
-        // [KEAMANAN] Cek Hak Akses
-        // User harus Pembina ATAU Sekertaris dari kelompok ini
+        // [KEAMANAN & HAK AKSES]
         $userId = session()->get('id');
-        if ($kelompok['pembina_id'] != $userId && $kelompok['sekertaris_id'] != $userId) {
-            return redirect()->to('/pembina')->with('error', 'Akses Ditolak. Anda bukan pengurus kelompok ini.');
+        $userRoles = session()->get('roles') ?? [];
+        
+        // Cek apakah dia Ketua/Admin?
+        $isKetua = in_array('ketua', $userRoles) || in_array('admin', $userRoles);
+        // Cek apakah dia Pengurus (Pembina/Sekertaris) kelompok ini?
+        $isPengurus = ($kelompok['pembina_id'] == $userId || $kelompok['sekertaris_id'] == $userId);
+
+        // Jika BUKAN Ketua DAN BUKAN Pengurus kelompok tsb -> TENDANG
+        if (!$isKetua && !$isPengurus) {
+            return redirect()->to('/pembina')->with('error', 'Akses Ditolak. Anda tidak memiliki izin melihat kelompok ini.');
         }
 
         // -----------------------------------------------------------
@@ -95,7 +112,7 @@ class PembinaController extends BaseController
         // Ambil filter tanggal dari input URL, default hari ini
         $filterTanggal = $this->request->getGet('tanggal') ?? date('Y-m-d');
         
-        helper('laporan'); // Load helper
+        helper('laporan'); 
         $periode = hitungPeriodeMingguan($filterTanggal);
 
         // Ambil Semua Anggota di Kelompok ini
@@ -112,7 +129,7 @@ class PembinaController extends BaseController
             ->where('periode_mulai', $periode['mulai'])
             ->findAll();
 
-        // Mapping Status (Gabungkan Anggota & Laporan)
+        // Mapping Status
         $rekapMingguan = [];
         foreach ($anggotaList as $anggota) {
             $status = 'Belum Lapor';
@@ -182,7 +199,7 @@ class PembinaController extends BaseController
         // RETURN VIEW
         // -----------------------------------------------------------
         $data = [
-            'title'          => 'Monitoring Anggota',
+            'title'          => 'Dashboard Pembinaan', // Title sedikit disesuaikan
             'kelompok'       => $kelompok,
             
             // Data Mingguan
