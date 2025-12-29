@@ -44,6 +44,7 @@ $RECYCLE.BIN/
 .env
 .vagrant
 Vagrantfile
+env hosting
 
 #-------------------------
 # Temporary Files
