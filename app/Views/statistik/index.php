@@ -30,27 +30,35 @@ $bulanIndo = [
 </style>
 
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <div>
-            <h3 class="mb-0 fw-bold">Monitoring Ketua</h3>
-            <p class="text-muted mb-0">
-                Data Laporan Periode: 
-                <span class="fw-bold text-primary">
-                    <?= strtoupper($bulanIndo[(int)$bulan]) ?> <?= $tahun ?>
-                </span>
-            </p>
-        </div>
-        
-        <form method="get" id="filterForm" class="d-flex gap-2">
-            <div>
-                <select name="bulan" class="form-select form-select-sm fw-bold border-primary" onchange="document.getElementById('filterForm').submit()">
+    <div class="mt-4 mb-4">
+    
+    <div class="mb-2">
+        <h3 class="fw-bold m-0">Monitoring Pelaksanaan UPA</h3>
+    </div>
+
+    <div class="mb-3">
+        <p class="text-muted m-0">
+            Data Laporan Periode: 
+            <span class="fw-bold text-primary">
+                <?= strtoupper($bulanIndo[(int)$bulan]) ?> <?= $tahun ?>
+            </span>
+        </p>
+    </div>
+    
+    <div>
+        <form method="get" id="filterForm" class="d-flex align-items-center gap-2">
+            <span class="small fw-bold text-muted">Filter:</span>
+            
+            <div style="width: auto; min-width: 140px;">
+                <select name="bulan" class="form-select form-select-sm fw-bold border-primary shadow-sm" onchange="document.getElementById('filterForm').submit()">
                     <?php foreach ($bulanIndo as $i => $b): ?>
                         <option value="<?= $i ?>" <?= $bulan == $i ? 'selected' : '' ?>><?= $b ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div>
-                <select name="tahun" class="form-select form-select-sm fw-bold border-primary" onchange="document.getElementById('filterForm').submit()">
+
+            <div style="width: auto; min-width: 100px;">
+                <select name="tahun" class="form-select form-select-sm fw-bold border-primary shadow-sm" onchange="document.getElementById('filterForm').submit()">
                     <?php for ($y = date('Y'); $y >= 2023; $y--): ?>
                         <option value="<?= $y ?>" <?= $tahun == $y ? 'selected' : '' ?>><?= $y ?></option>
                     <?php endfor; ?>
@@ -58,6 +66,8 @@ $bulanIndo = [
             </div>
         </form>
     </div>
+
+</div>
 
     <hr class="mb-4">
 
