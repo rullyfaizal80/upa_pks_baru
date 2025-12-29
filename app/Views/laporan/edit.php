@@ -47,7 +47,7 @@
 
 <div class="container-fluid">
     <div class="mb-3 border rounded p-3">
-        <h4 class="mb-3 text-center">Edit Laporan (<?= $jenjang ?>)</h4>
+        <h4 class="mb-3 text-center">Edit Laporan Amalan Harian Anggota UPA</h4>
         <div class="alert alert-secondary text-center py-2 mb-0">
             <strong>Periode Laporan:</strong><br>
             <?= date('d M Y', strtotime($laporan['periode_mulai'])) ?> s/d <?= date('d M Y', strtotime($laporan['periode_selesai'])) ?>

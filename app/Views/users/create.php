@@ -33,7 +33,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                        <input type="text" name="nama" class="form-control" value="<?= old('nama') ?>" placeholder="Contoh: Budi Santoso" required>
+                        <input type="text" name="nama" class="form-control" value="<?= old('nama') ?>" placeholder="Contoh: Rully Faizal" required>
                     </div>
 
                     <div class="row">

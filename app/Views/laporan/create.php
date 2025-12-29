@@ -5,10 +5,11 @@
 <div class="container-fluid">
     
     <div class="mb-3 border rounded p-3">
-        <h4 class="mb-3 text-center">Laporan Amalan Harian</h4>
-        <div class="alert alert-secondary text-center py-2 mb-0">
-            <strong>Info Pengisian:</strong><br>
-            Laporan untuk periode Senin – Ahad. Pastikan mengisi dengan jujur.
+        <h4 class="mb-3">Laporan Amalan Harian Anggota UPA</h4>
+        <div class="alert alert-secondary py-2 mb-0">
+            1. Amalan Harian ini di Laporkan sepekan sekali periode Senin-Ahad<br>
+            2. Pengisian Laporan dilakukan oleh masing-masing anggota UPA<br>
+            3. Pengisian bisa dilakukan bersama-sama saat UPA berlangsung
         </div>
     </div>
 
@@ -35,8 +36,10 @@
         <hr>
 
         <div class="mb-3 border rounded p-3">
-            <label class="fw-bold">1. Sholat Berjamaah di Mesjid pekan ini (Laki-laki) *</label>
-            <div class="form-text text-muted mb-2">Perempuan isi 0.</div>
+            <label class="fw-bold">1. Sholat Berjamaah di Mesjid pekan ini (Laki-laki) *
+                <br>Sholat Berjamaah di mesjid sepekan tidak lebih dari 35x
+            </label>
+            <div class="form-text text-muted mb-2">Perempuan isi 0 / dikosongkan</div>
             <input type="number" name="amalan_1" class="form-control" min="0" max="35" value="<?= old('amalan_1') ?>" placeholder="0-35">
         </div>
 
@@ -53,7 +56,7 @@
         </div>
 
         <div class="mb-3 border rounded p-3">
-            <label class="fw-bold d-block mb-2">3. Tilawah Al-Qur'an Pekan ini *</label>
+            <label class="fw-bold d-block mb-2">3. Membaca Al-Qur'an Pekan ini *</label>
 
             <?php if ($jenjang == 'Muda'): ?>
                 <div class="alert alert-info py-2 small">Target Muda: 14 Halaman/pekan. (Satuan: Halaman)</div>
@@ -70,7 +73,7 @@
                 </div>
 
             <?php else: ?>
-                <div class="alert alert-success py-2 small">Target Pratama: 3.5 Juz/pekan. (Satuan: JUZ)</div>
+                <div class="alert alert-success py-2 small">Target Pratama: 3.5 Juz/pekan.</div>
                 <div class="d-flex flex-column gap-2">
                     <?php foreach([1, 2, 3] as $val): ?>
                         <div class="form-check">
@@ -89,6 +92,7 @@
                         <label class="form-check-label ms-2 me-2">Lainnya (Juz):</label>
                         <input type="text" name="amalan_3_custom" id="amalan_3_custom_input" class="form-control form-control-sm" style="max-width: 100px;" disabled>
                     </div>
+                    <div class="form-text text-muted mb-2">Tanda koma menggunakan titik</div>
                 </div>
             <?php endif; ?>
         </div>
@@ -112,7 +116,9 @@
         </div>
 
         <div class="mb-3 border rounded p-3">
-            <label class="fw-bold">5. Al-Ma'tsurat Pekan ini *</label>
+            <label class="fw-bold">5. Al-Ma'tsurat Pekan ini *
+                <br>Standar 2x sehari (14x sepekan)
+            </label>
             <input type="number" name="amalan_5" class="form-control" min="0" max="14" value="<?= old('amalan_5') ?>" required>
         </div>
 
@@ -129,25 +135,47 @@
         </div>
 
         <?php 
-        $labels = [
-            7 => '7. Olahraga Pekan ini (Min 20 menit/hari) *',
-            8 => '8. Membaca Istighfar Pekan ini (100x/hari) *',
-            9 => '9. Membaca Shalawat Pekan ini (100x/hari) *'
-        ];
-        foreach ($labels as $n => $label): 
-        ?>
-            <div class="mb-3 border rounded p-3">
-                <label class="fw-bold d-block mb-2"><?= $label ?></label>
-                <div class="d-flex flex-wrap gap-3">
-                    <?php for ($i = 0; $i <= 7; $i++): ?>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="amalan_<?= $n ?>" id="amalan_<?= $n ?>_<?= $i ?>" value="<?= $i ?>" <?= old("amalan_$n") === (string)$i ? 'checked' : '' ?> required>
-                            <label class="form-check-label" for="amalan_<?= $n ?>_<?= $i ?>"><?= $i ?></label>
-                        </div>
-                    <?php endfor; ?>
+$labels = [
+    7 => [
+        'title' => '7. Olahraga Pekan ini (Min 20 menit/hari) *',
+        'desc'  => 'Standar1x per hari (7x per pekan)'
+    ],
+    8 => [
+        'title' => '8. Membaca Istighfar Pekan ini (100x/hari) *',
+        'desc'  => 'Standar 7x per pekan'
+    ],
+    9 => [
+        'title' => '9. Membaca Shalawat Pekan ini (100x/hari) *',
+        'desc'  => 'Standar 7x per Pekan'
+    ]
+];
+
+foreach ($labels as $n => $item): 
+?>
+    <div class="mb-3 border rounded p-3">
+        <label class="fw-bold d-block mb-1"><?= $item['title'] ?></label>
+        <small class="text-muted d-block mb-2">
+            <?= $item['desc'] ?>
+        </small>
+
+        <div class="d-flex flex-wrap gap-3">
+            <?php for ($i = 0; $i <= 7; $i++): ?>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio"
+                        name="amalan_<?= $n ?>"
+                        id="amalan_<?= $n ?>_<?= $i ?>"
+                        value="<?= $i ?>"
+                        <?= old("amalan_$n") === (string)$i ? 'checked' : '' ?>
+                        required>
+                    <label class="form-check-label" for="amalan_<?= $n ?>_<?= $i ?>">
+                        <?= $i ?>
+                    </label>
                 </div>
-            </div>
-        <?php endforeach; ?>
+            <?php endfor; ?>
+        </div>
+    </div>
+<?php endforeach; ?>
+
 
         <div class="d-flex gap-2 mt-4">
             <a href="/laporan/dashboard" class="btn btn-secondary w-50 py-2 fw-bold">
