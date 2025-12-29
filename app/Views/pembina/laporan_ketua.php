@@ -32,7 +32,7 @@
         /* Reset layout browser */
         @page {
             size: A4 portrait;
-            margin: 10mm 15mm;
+            margin: 0mm 10mm;
         }
 
         body {
@@ -56,19 +56,16 @@
             width: 100% !important;
         }
 
-        /* Atur Ulang Grid System Bootstrap agar muat 1 baris */
-        .row {
-            display: flex !important;
-            flex-wrap: nowrap !important; /* Paksa jangan turun baris */
-            gap: 10px;
-        }
+       .row {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
 
-        /* Paksa kartu menjadi 4 kolom sejajar (masing-masing 25%) */
-        .col-md-3, .col-6 {
-            width: 25% !important;
-            flex: 0 0 25% !important;
-            max-width: 25% !important;
-        }
+    .col-md-3, .col-6 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 
         /* Kecilkan font dan padding di dalam kartu agar muat */
         .border.rounded {
@@ -101,36 +98,84 @@
         .break-inside-avoid {
             page-break-inside: avoid;
         }
+         
+         /* MATIKAN GUTTER */
+    .keterangan-amalan .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        --bs-gutter-x: 0 !important;
     }
+
+    /* 2 KOLOM FIX 50% */
+    .keterangan-amalan .col-6 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        box-sizing: border-box !important;
+    }
+    .ttd-table,
+    .ttd-table td {
+        border: none !important;
+    }
+    }
+
+     .logo-img {
+            max-height: 80px; /* Atur tinggi logo */
+            margin-bottom: 15px;
+     }
+     
 </style>
 
 <div class="container-fluid mt-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-        <h3 class="fw-bold text-primary">Laporan Statistik Bulanan</h3>
-        
-        <form action="" method="get" class="d-flex gap-2 align-items-center">
-            <select name="bulan" class="form-select">
-                <?php 
-                $listBulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-                foreach($listBulan as $k => $v): ?>
-                    <option value="<?= $k ?>" <?= $k == $filter_bulan ? 'selected' : '' ?>><?= $v ?></option>
-                <?php endforeach; ?>
-            </select>
-            <select name="tahun" class="form-select">
-                <?php for($i=date('Y'); $i>=2023; $i--): ?>
-                    <option value="<?= $i ?>" <?= $i == $filter_tahun ? 'selected' : '' ?>><?= $i ?></option>
-                <?php endfor; ?>
-            </select>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-filter"></i></button>
-            <button type="button" onclick="window.print()" class="btn btn-danger"><i class="bi bi-printer"></i> PDF/Cetak</button>
-        </form>
+    <div class="card bg-light border-0 shadow-sm mb-4 no-print">
+        <div class="card-body py-3">
+            
+            <div class="text-center mb-3">
+                <h3 class="fw-bold text-primary m-0">
+                    <i class="bi bi-bar-chart-line me-2"></i>Laporan Statistik Bulanan
+                </h3>
+            </div>
+
+            <form action="" method="get" class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                
+                <select name="bulan" class="form-select w-auto border-primary shadow-sm">
+                    <?php 
+                    $listBulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                    foreach($listBulan as $k => $v): ?>
+                        <option value="<?= $k ?>" <?= $k == $filter_bulan ? 'selected' : '' ?>><?= $v ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <select name="tahun" class="form-select w-auto border-primary shadow-sm">
+                    <?php for($i=date('Y'); $i>=2023; $i--): ?>
+                        <option value="<?= $i ?>" <?= $i == $filter_tahun ? 'selected' : '' ?>><?= $i ?></option>
+                    <?php endfor; ?>
+                </select>
+
+                <button type="submit" class="btn btn-primary shadow-sm fw-bold">
+                    <i class="bi bi-search me-1"></i> Tampilkan
+                </button>
+                
+                <button type="button" onclick="window.print()" class="btn btn-danger shadow-sm fw-bold">
+                    <i class="bi bi-printer-fill me-1"></i> PDF
+                </button>
+
+            </form>
+
+        </div>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body p-4">
             
             <div class="text-center mb-4">
+                <img src="<?= base_url('assets/img/logo.png') ?>" alt="Logo" class="logo-img">
+                <h4 class="fw-bold mb-1 text-uppercase">DPC ARCAMANIK</h4>
                 <h4 class="fw-bold mb-1 text-uppercase">Laporan Pembinaan Anggota</h4>
                 <h5 class="text-muted">Periode: <?= $listBulan[$filter_bulan] ?> <?= $filter_tahun ?></h5>
             </div>
@@ -228,15 +273,15 @@
                     <thead class="table-success">
                         <tr>
                             <th class="text-start ps-3">Kategori</th>
-                            <th width="8%">Jam'</th>
-                            <th width="8%">Qiyam</th>
-                            <th width="8%">Tila</th>
-                            <th width="8%">Shaum</th>
-                            <th width="8%">Mats</th>
-                            <th width="8%">Dhuha</th>
-                            <th width="8%">OR</th>
-                            <th width="8%">Istig</th>
-                            <th width="8%">Shala</th>
+                            <th width="8%">A1</th>
+                            <th width="8%">A2</th>
+                            <th width="8%">A3</th>
+                            <th width="8%">A4</th>
+                            <th width="8%">A5</th>
+                            <th width="8%">A6</th>
+                            <th width="8%">A7</th>
+                            <th width="8%">A8</th>
+                            <th width="8%">A9</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -246,18 +291,52 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="small text-muted fst-italic">
-                * Ket: Rata-rata Shalat Berjamaah (Jam') <strong>khusus Laki-Laki</strong>.
-            </div>
-
-            <div class="row mt-4 pt-3 break-inside-avoid">
-                <div class="col-5 offset-7 text-center">
-                    <p class="mb-5">Diketahui Oleh,<br>Ketua</p>
-                    <br>
-                    <p class="fw-bold text-decoration-underline">_______________________</p>
+            <div class="small text-muted fst-italic border rounded p-2 mt-3 bg-light no-print-bg keterangan-amalan">
+                <div class="fw-bold mb-1">Keterangan Kode Amalan:</div>
+                <div class="row">
+                    <div class="col-6">
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>A1 :</strong> Sholat Berjamaah di Masjid</li>
+                            <li><strong>A2 :</strong> Sholat Malam (Qiyamullail)</li>
+                            <li><strong>A3 :</strong> Membaca Al-Quran (Juz)</li>
+                            <li><strong>A4 :</strong> Shaum Sunnah</li>
+                            <li><strong>A5 :</strong> Al-Ma'tsurat</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-6">
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>A6 :</strong> Sholat Dhuha</li>
+                            <li><strong>A7 :</strong> Olahraga</li>
+                            <li><strong>A8 :</strong> Membaca Istighfar</li>
+                            <li><strong>A9 :</strong> Membaca Shalawat</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
+            <table class="ttd-table" style="width:100%; border-collapse:collapse;">
+    <tr>
+        <td style="width:50%;"></td>
+        <td style="width:10%;"></td>
+
+        <!-- KOLOM KE-3 -->
+        <td style="width:40%; text-align:center; vertical-align:top;">
+            <div style="margin-top:40px; page-break-inside:avoid;">
+                <p style="margin-bottom:60px;">
+                    Mengetahui,<br>
+                    <strong>Ketua</strong>
+                </p>
+
+                <p style="font-weight:bold; text-decoration:underline;">
+                    _______________________
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+            
 
         </div>
     </div>
